@@ -1,0 +1,41 @@
+SELECT * FROM Customers;   -- 5 rows
+SELECT * FROM Products;    -- 5 rows
+SELECT * FROM Sales;
+-- Total revenue
+SELECT SUM(s.Quantity * p.Price) AS Total_Revenue
+FROM Sales s JOIN Products p ON s.Product_ID = p.Product_ID;
+
+-- Customer-wise sales
+SELECT c.Customer_Name, SUM(s.Quantity * p.Price) AS Total_Purchase
+FROM Sales s
+JOIN Customers c ON s.Customer_ID = c.Customer_ID
+JOIN Products p  ON s.Product_ID  = p.Product_ID
+GROUP BY c.Customer_Name
+ORDER BY Total_Purchase DESC;
+
+-- City-wise sales
+SELECT c.City, SUM(s.Quantity * p.Price) AS City_Sales
+FROM Sales s
+JOIN Customers c ON s.Customer_ID = c.Customer_ID
+JOIN Products p  ON s.Product_ID  = p.Product_ID
+GROUP BY c.City
+ORDER BY City_Sales DESC;
+
+-- Product-wise sales
+SELECT p.Product_Name, SUM(s.Quantity) AS Total_Quantity,
+       SUM(s.Quantity * p.Price) AS Total_Sales
+FROM Sales s JOIN Products p ON s.Product_ID = p.Product_ID
+GROUP BY p.Product_Name
+ORDER BY Total_Sales DESC;       
+-- COMMIT: new sale is saved permanently
+BEGIN;
+INSERT INTO Sales VALUES ('S009', 104, 'P03', 1, CURRENT_DATE);
+COMMIT;
+SELECT * FROM Sales;          -- 9 rows
+
+-- ROLLBACK: change is cancelled
+BEGIN;
+UPDATE Sales SET Quantity = 10 WHERE Sale_ID = 'S001';
+SELECT * FROM Sales WHERE Sale_ID = 'S001';   -- shows 10 inside the transaction
+ROLLBACK;
+SELECT * FROM Sales WHERE Sale_ID = 'S001';   -- back to 1
